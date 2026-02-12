@@ -146,7 +146,49 @@ def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
 def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    #Essentially Dijkstra's algorithm, we just need to use a priority queue and add the cost of the path to the frontier
+    #Referenced the format of the textbook (Artificial Intelligence: A Modern Approach)
+    #Referenced util.py, so I used the PriorityQueue() function to create a priority queue data structure, then use update() to add items to the frontier.
+    
+    #Create a node with with a state, and should have a cost of 0.
+    startState = problem.getStartState()
+    startNode = (startState, [], 0)  #tuple of (state, path, cost)
+    
+    #The frontier is a priority queue ordered by the cost of the path.
+    frontier = util.PriorityQueue()  #utilizing the priority queue data structure from util.py
+    frontier.push(startNode, 0)      #The cost of the start node is 0
+
+    #Creating an empty set for explored nodes
+    exploredSet = set() 
+
+    bestCost = {startState: 0} #So we can properly replace the frontier
+
+    while frontier.isEmpty() == False:
+        #Choose the node in the frontier with the lowest total cost and remove it from the frontier.
+        state, path, cost = frontier.pop() #Since it's a priority queue, pop the node with the lowest cost
+
+        #If the node contains a goal state then return the corresponding solution
+        if problem.isGoalState(state):
+            return path
+        
+        #Add the node to the explored set
+        if exploredSet.__contains__(state) == False:   ##The same thing as saying "if state not in exploredSet:"
+            exploredSet.add(state)
+
+            # for each action in problem.ACTIONS(node.STATE)
+            for successor, action, stepCost in problem.getSuccessors(state):
+                newPath = path + [action]
+                newCost = cost + stepCost
+
+                # if child not explored OR cheaper path found
+                if exploredSet.__contains__(successor) == False:
+                    if successor not in bestCost or newCost < bestCost[successor]:
+                        bestCost[successor] = newCost
+                        frontier.push((successor, newPath, newCost), newCost)
+    
+    return [] #No solution found, return empty list.
+
+    ##util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None) -> float:
     """
