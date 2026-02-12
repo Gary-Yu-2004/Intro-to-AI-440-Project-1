@@ -200,7 +200,51 @@ def nullHeuristic(state, problem=None) -> float:
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directions]:
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    ##Should be similar to Uniform Search, but we need to add the heuristic value to the cost.
+    ##Also need to make sure that some nodes can be expanded more than once if we find a cheaper path to them, which requires some adjusting from my previous implementation of UCS.
+
+    #Create a node with with a state, and should have a cost of 0.
+    startState = problem.getStartState()
+    startCost = 0
+    startNode = (startState, [], startCost)  #tuple of (state, path, cost)
+    
+    
+    #The frontier is a priority queue ordered by the cost of the path.
+    frontier = util.PriorityQueue()  #utilizing the priority queue data structure from util.py
+    frontier.push(startNode, startCost + heuristic(startState, problem))      #The cost of the start node is 0
+
+    #Creating an empty set for explored nodes
+    ##exploredSet = set() 
+
+    bestCost = {startState: 0} #So we can properly replace the frontier
+
+    while frontier.isEmpty() == False:
+        #Choose the node in the frontier with the lowest total cost and remove it from the frontier.
+        state, path, cost = frontier.pop() #Since it's a priority queue, pop the node with the lowest cost
+
+        #Skipping outdated entries in the frontier
+        if cost > bestCost.get(state, float('inf')):
+            continue
+        
+        #If the node contains a goal state then return the corresponding solution
+        if problem.isGoalState(state):
+            return path
+        
+
+        # for each action in problem.ACTIONS(node.STATE)
+        for successor, action, stepCost in problem.getSuccessors(state):
+
+            newCost = cost + stepCost
+
+            if newCost < bestCost.get(successor, float("inf")):
+                bestCost[successor] = newCost
+                priority = newCost + heuristic(successor, problem)
+                frontier.push((successor, path + [action], newCost),
+                              priority)
+    
+    return [] #No solution found, return empty list.
+
+    ##util.raiseNotDefined()
 
 # Abbreviations
 bfs = breadthFirstSearch
