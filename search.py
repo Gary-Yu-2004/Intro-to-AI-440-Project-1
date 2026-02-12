@@ -78,7 +78,7 @@ def tinyMazeSearch(problem: SearchProblem) -> List[Directions]:
 def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
     """
     Search the deepest nodes in the search tree first.
-    
+
     Your search algorithm needs to return a list of actions that reaches the
     goal. Make sure to implement a graph search algorithm.
 
@@ -90,6 +90,30 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+    #My comments is the pseudocode from the textbook, I'm using it to guide the implementation
+    #initialize the frontier using the initial state of problem
+    initState = problem.getStartState() #Initial state of the problem
+    frontier = util.Stack() #This just straight up creates a stack data structure for us to use as the frontier
+
+    #Now we initialize the explored set to be empty
+    exploredSet = set()
+    frontier.push((initState, []))
+    
+    #loop do
+    while frontier.isEmpty() == False:
+        #if the frontier is empty then return failure, choose a leaf node and remove it from the frontier
+        if frontier.isEmpty(): return []
+        #choose a leaf node and remove it from the frontier
+        state, path = frontier.pop()
+        #if the node contains a goal state then return the corresponding solution
+        if problem.isGoalState(state): return path
+        #add the node to the explored set
+        if exploredSet.__contains__(state) == False: 
+            exploredSet.add(state)
+            for successor, action, stepCost in problem.getSuccessors(state):
+                newPath = path + [action]
+                frontier.push((successor, newPath))
+
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
