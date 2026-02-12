@@ -352,22 +352,22 @@ class CornersProblem(search.SearchProblem):
             currentPosition, visited = state
 
             #Now we need to check all the possible actions and add the legal ones to our successor list. We also need to update the visited corners if we hit a new corner. 
-            for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-                x,y = currentPosition
-                dx, dy = Actions.directionToVector(action)
-                nextx, nexty = int(x + dx), int(y + dy)
+            
+            x,y = currentPosition
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
 
-                if not self.walls[nextx][nexty]:
+            if not self.walls[nextx][nexty]:
 
-                    nextPosition = (nextx, nexty)
-                    nextVisited = visited
+                nextPosition = (nextx, nexty)
+                nextVisited = visited
 
                     #If we hit a new corner, we need to add it to the visited tuple
-                    if nextPosition in self.corners and nextPosition not in visited:
-                        nextVisited = visited + (nextPosition,)
+                if nextPosition in self.corners and nextPosition not in visited:
+                    nextVisited = visited + (nextPosition,)
 
                     # As mentioned by Hint 2
-                    successors.append( ((nextPosition, nextVisited), action, 1) )
+                successors.append( ((nextPosition, nextVisited), action, 1) )
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
