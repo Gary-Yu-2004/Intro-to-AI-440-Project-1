@@ -296,14 +296,35 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        ## All functions Will be referencing my Q2 (BFS) implementation.
+
+        #To check and keep track whether a position (in this case the 4 corners of the maze) has been visited.
+        visited = ()
+        
+        #So if start in a corner, we will mark it as visited before we start the search.
+        if self.startingPosition in self.corners:
+            visited = (self.startingPosition,)
+
+        return (self.startingPosition, visited)
+
+        ##util.raiseNotDefined()
 
     def isGoalState(self, state: Any):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        ## Since we have to visit all the four corners, we can just check if the length of the visited (unique) corners is 4.
+        ## If it is, then we know we have visited all the corners and we can return true. Otherwise, we return false.
+        ## Hint 1 helped a lot.
+        visited = state[1]       #So basically, state = (position, visited_tuple)
+        if len(visited) == 4:
+            return True
+        else:
+            return False
+
+        ##util.raiseNotDefined()
 
     def getSuccessors(self, state: Any):
         """
@@ -327,6 +348,26 @@ class CornersProblem(search.SearchProblem):
 
             "*** YOUR CODE HERE ***"
 
+            #Here we need to know our current position and which corners we visited so we can update them accordingly.
+            currentPosition, visited = state
+
+            #Now we need to check all the possible actions and add the legal ones to our successor list. We also need to update the visited corners if we hit a new corner. 
+            for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+                x,y = currentPosition
+                dx, dy = Actions.directionToVector(action)
+                nextx, nexty = int(x + dx), int(y + dy)
+
+                if not self.walls[nextx][nexty]:
+
+                    nextPosition = (nextx, nexty)
+                    nextVisited = visited
+
+                    #If we hit a new corner, we need to add it to the visited tuple
+                    if nextPosition in self.corners and nextPosition not in visited:
+                        nextVisited = visited + (nextPosition,)
+
+                    # As mentioned by Hint 2
+                    successors.append( ((nextPosition, nextVisited), action, 1) )
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
