@@ -101,8 +101,6 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
     
     #loop do
     while frontier.isEmpty() == False:
-        #if the frontier is empty then return failure, choose a leaf node and remove it from the frontier
-        if frontier.isEmpty(): return []
         #choose a leaf node and remove it from the frontier
         state, path = frontier.pop()
         #if the node contains a goal state then return the corresponding solution
@@ -119,6 +117,30 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
 def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    #We initialize the frontier and explored set in the same way, but swap the LIFO stack for a FIFO queue
+    #The implementation is QUITE LITERALLY the exact same as BFS just swap the util from stack to queue.
+    initState = problem.getStartState()
+    frontier = util.Queue()
+
+    #Init empty explored set
+    exploredSet = set()
+    frontier.push((initState, []))
+
+    #loop do
+    while frontier.isEmpty() == False:
+        #Since queue is FIFO, pop here always grabs the shallowest node to expand
+        state, path = frontier.pop()
+        #Check if node is the solution state
+        if problem.isGoalState(state):
+            return path
+        #Else, check if node is already visisted before
+        if exploredSet.__contains__(state) == False:
+            #If never visited before then:
+            exploredSet.add(state)
+            for successor, action, stepCost in problem.getSuccessors(state):
+                newPath = path + [action]
+                frontier.push((successor, newPath))
+        
     util.raiseNotDefined()
 
 def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
