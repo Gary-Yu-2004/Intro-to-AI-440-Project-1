@@ -525,7 +525,7 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     Your heuristic for the FoodSearchProblem goes here.
 
     If using A* ever finds a solution that is worse uniform cost search finds,
-    your search may have a but our your heuristic is not admissible! On the
+    your search may have a but our your heuristic is not admissible!  On the
     other hand, inadmissible heuristics may find optimal solutions, so be careful.
 
     The state is a tuple ( pacmanPosition, foodGrid ) where foodGrid is a Grid
@@ -545,39 +545,6 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-
-    foodList = foodGrid.asList()
-    initState = problem.startingGameState
-    position = initState[0]
-
-    maxDist = 0
-    maxDistPair = (None, None)
-
-    def manhattan(p1, p2):
-        return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
-    
-    for i in range(len(foodList)):
-        for j in range(i + 1, len(foodList)):
-            point1 = foodList[i]
-            point2 = foodList[j]
-
-            #find distance between these two bumass pts
-            dist = manhattan(point1, point2)
-            if dist > maxDist:
-                maxDist = dist
-                maxDistPair = (point1, point2)
-
-    #Now we determine which point Packyboi is closest to. 
-    if manhattan(position, maxDistPair[0]) > manhattan(position, maxDistPair[1]):
-        pacDist = manhattan(position, maxDistPair[0])
-        maxDist = manhattan(maxDistPair[0], maxDistPair[1])
-    else:
-        pacDist = manhattan(position, maxDistPair[1])
-        maxDist = manhattan(maxDistPair[0], maxDistPair[1])
-
-    return pacDist + maxDist
-
-    ##return 0
 
     #Convert the foodGrid to a list of coordinates for easier processing
     foodList = foodGrid.asList()
@@ -673,7 +640,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
 
     You can use this search problem to help you fill in the findPathToClosestDot
     method.
-    """ 
+    """
 
     def __init__(self, gameState):
         "Stores information from the gameState.  You don't need to change this."
