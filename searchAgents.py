@@ -403,9 +403,60 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
+    #My heuristic's goal is to travel to the nearest corner, and then connect the remaining corners in the shortest possible MANHATTAN distance
+    #Since I am connecting everything via the manhattan distance, it is the lower bounds of the actual distance, and so any real path taken is at min the cost of the heuristic\
+
+    #State initialization
+    position, visited = state
+
+    #Calculate corners remaining
+    remainingCorners = [
+        corner for corner in corners 
+            if corner not in visited
+    ]
+
+    #If there are no corners remaining
+    if not remainingCorners: return 0
+
+    #manhattan helper function (I could not get manhattan heuristic to work here)
+    def manhattan(p1, p2):
+        return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
+    
+    #initial distance is the minimum distance from Pacman's position to any of the remaining Corners
+    initDistance = min(manhattan(position, corner) for corner in remainingCorners)
+
+    #This is the main part of the heuristic, the goal is to connect the remaining corners in the shortest way possible
+    #mincost is the estimated distance, and connected/unconnected is basically just two sets of corners so I can move connected corners out of the set
+    minCost = 0
+    connected = [remainingCorners[0]]
+    unconnected = remainingCorners[1:]
+
+    #basically this loop picks the the closet of the "unconnected corners", moves into the "connected corners", and then it runs this shit back
+    #through, testing to see which manhattan distance is closest to ANY of the 'connected' corners, and then moves that closest corner into the connected set
+    #until their are no more unconnected corners. I keep track of the total distance here with mincost that adds up each "edge" (the manhattan distance)
+    #and then adds that mincost to the initDistance which is the manhattan distance for packman to move from his position, and then the min distance to connect
+    # remaining corners. I have no idea what the manhattan heuristic doesn't work but this helper function I made does work.
+    while unconnected: #The idea is to keep this looping until I move everything from the unconnected to the connected set
+        minEdge = float('inf') #
+        bestCorner = None #i.e. the closest distance to the corner
+        
+        #double for loop cause the num of corners in either set will change over time
+        for c1 in connected:
+            for c2 in unconnected:
+                dist = manhattan(c1, c2)
+                #is the dist between these 2 corners better or worse than the current best mandist between another pair of corners?
+                if dist < minEdge:
+                    minEdge = dist
+                    bestCorner = c2
+
+        #add the now 100% shortest manhattan distance between two corners to the minCost, and then append that "best corner" to the connected list
+        minCost += minEdge
+        connected.append(bestCorner)
+        unconnected.remove(bestCorner)
+
+    return initDistance + minCost
+
     return 0 # Default to trivial solution
-
-
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -494,8 +545,56 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
 
+    #Convert the foodGrid to a list of coordinates for easier processing
+    foodList = foodGrid.asList()
+
+    ##Goal State - If there no food left, we are at the goal state.
+
+    if not foodList:
+        return 0
+
+    ## Initializing cache dictionary for the heuristic to store distance, so we calculate it a lot.
+    if 'mazeDist' not in problem.heuristicInfo:
+        problem.heuristicInfo['mazeDist'] = {}
+    
+    
+    mazeCache=problem.heuristicInfo['mazeDist']
+    initState = problem.startingGameState
+
+
+    # We need to cache the distance of the maze
+
+    def cachedMazeDist(p1, p2):
+        key=tuple(sorted((p1, p2)))
+        if key not in mazeCache:
+            mazeCache[key] = mazeDistance(p1, p2, initState)
+        return mazeCache[key]
+    
+    #When there is only one food left, we can just return the distance to that food as the heuristic value.
+    if len(foodList) == 1: 
+        return cachedMazeDist(position, foodList[0])
+    
+    #Finding the two farthest dots (maze diameter)
+    maxDist = 0
+    maxPair = (None, None)
+    
+    for i in range(len(foodList)):
+        for j in range(i + 1, len(foodList)):
+            dist = cachedMazeDist(foodList[i], foodList[j])
+            if dist > maxDist:
+                maxDist = dist
+                maxPair = (foodList[i], foodList[j])
+                
+    #Distance from Pacman to the closest of the two food
+    distToFirst = cachedMazeDist(position, maxPair[0])
+    distToSecond = cachedMazeDist(position, maxPair[1])
+
+    pacDist = min(distToFirst, distToSecond)
+
+    return pacDist + maxDist
+
+    ##return 0
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
