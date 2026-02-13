@@ -579,6 +579,55 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
 
     ##return 0
 
+    #Convert the foodGrid to a list of coordinates for easier processing
+    foodList = foodGrid.asList()
+
+    ##Goal State - If there no food left, we are at the goal state.
+
+    if not foodList:
+        return 0
+
+    ## Initializing cache dictionary for the heuristic to store distance, so we calculate it a lot.
+    if 'mazeDist' not in problem.heuristicInfo:
+        problem.heuristicInfo['mazeDist'] = {}
+    
+    
+    mazeCache=problem.heuristicInfo['mazeDist']
+    initState = problem.startingGameState
+
+
+    # We need to cache the distance of the maze
+
+    def cachedMazeDist(p1, p2):
+        key=tuple(sorted((p1, p2)))
+        if key not in mazeCache:
+            mazeCache[key] = mazeDistance(p1, p2, initState)
+        return mazeCache[key]
+    
+    #When there is only one food left, we can just return the distance to that food as the heuristic value.
+    if len(foodList) == 1: 
+        return cachedMazeDist(position, foodList[0])
+    
+    #Finding the two farthest dots (maze diameter)
+    maxDist = 0
+    maxPair = (None, None)
+    
+    for i in range(len(foodList)):
+        for j in range(i + 1, len(foodList)):
+            dist = cachedMazeDist(foodList[i], foodList[j])
+            if dist > maxDist:
+                maxDist = dist
+                maxPair = (foodList[i], foodList[j])
+                
+    #Distance from Pacman to the closest of the two food
+    distToFirst = cachedMazeDist(position, maxPair[0])
+    distToSecond = cachedMazeDist(position, maxPair[1])
+
+    pacDist = min(distToFirst, distToSecond)
+
+    return pacDist + maxDist
+
+    ##return 0
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
